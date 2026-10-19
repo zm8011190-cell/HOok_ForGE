@@ -1,0 +1,40 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:zain@db:5432/Hook_Forge
+    depends_on:
+      db:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: dockerfile
+    command: ["python", "-m", "app.worker.poller"]
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:zain@db:5432/Hook_Forge
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=zain
+      - POSTGRES_DB=Hook_Forge
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d Hook_Forge"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

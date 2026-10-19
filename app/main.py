@@ -1,0 +1,29 @@
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+
+from app.database import Base, engine
+from app.api.events import router as events_router
+from app.api.endpoints import router as endpoints_router
+from app.api.deliveries import router as deliveries_router
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    try:
+        async with engine.begin() as connection:
+            await connection.run_sync(Base.metadata.create_all)
+        yield
+    finally:
+        await engine.dispose()
+
+
+app = FastAPI(lifespan=lifespan)
+app.include_router(events_router)
+app.include_router(endpoints_router)
+app.include_router(deliveries_router)
+
+
+@app.get("/health", status_code=200)
+async def health_check():
+    return {"status": "ok"}
