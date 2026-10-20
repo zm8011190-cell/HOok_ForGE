@@ -4,11 +4,15 @@ Hook Forge is an API for registering webhook endpoints, accepting events, and tr
 
 ## OpenAPI documentation
 
-Start the application with Docker Compose (see [Running the application](#running-the-application)), then open:
+Start the application with Docker Compose (see [Running the application](#running-the-application)), then open the Hook Forge dashboard at <http://localhost:8000>.
+
+API reference:
 
 - Swagger UI: <http://localhost:8000/docs>
 - ReDoc: <http://localhost:8000/redoc>
 - OpenAPI schema: <http://localhost:8000/openapi.json>
+
+The dashboard shows API health, endpoint and delivery activity, and includes forms to register an endpoint or publish an event. Failed deliveries can be queued for retry from the deliveries table.
 
 ### Swagger UI
 
