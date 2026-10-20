@@ -18,7 +18,11 @@ async def lifespan(_: FastAPI):
         await engine.dispose()
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title="Hook Forge API",
+    description="Accept events and deliver signed webhooks to registered endpoints.",
+    lifespan=lifespan,
+)
 app.include_router(events_router)
 app.include_router(endpoints_router)
 app.include_router(deliveries_router)
