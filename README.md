@@ -31,7 +31,7 @@ The dashboard shows API health, endpoint and delivery activity, and includes for
 | `GET` | `/endpoints` | List registered endpoints. Secrets are not included. |
 | `POST` | `/events` | Create an event and queue deliveries for active endpoints. |
 | `GET` | `/deliveries` | List the latest 50 deliveries and their status. |
-| `POST` | `/deliveries/{delivery_id}/reply` | Queue a failed or retrying delivery for retry. |
+| `POST` | `/deliveries/{delivery_id}/retry` | Queue a failed or retrying delivery for retry. |
 
 Event creation accepts a JSON object with a non-empty event name, a JSON object payload, and an idempotency key:
 

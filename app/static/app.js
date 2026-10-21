@@ -101,7 +101,7 @@ function renderEndpoints(endpoints) {
   elements.endpointRows.innerHTML = endpoints.map((endpoint) => `
     <tr>
       <td><div class="endpoint-cell"><span class="endpoint-icon">↗</span><div style="min-width:0"><div class="endpoint-url">${escapeHtml(endpoint.url)}</div><div class="endpoint-host">${escapeHtml(hostFromUrl(endpoint.url))}</div></div></div></td>
-      <td><span class="status-pill">ACTIVE</span></td>
+      <td><span class="status-pill ${endpoint.is_active ? "" : "status-inactive"}">${endpoint.is_active ? "ACTIVE" : "INACTIVE"}</span></td>
       <td class="row-id">#${escapeHtml(endpoint.id)}</td>
     </tr>`).join("");
 }
@@ -114,7 +114,7 @@ function renderDeliveries(deliveries) {
 
   $("#metric-deliveries").textContent = deliveries.length;
   $("#delivery-window").textContent = "50";
-  $("#metric-success").innerHTML = `${successRate}<small>%</small>`;
+  $("#metric-success").innerHTML = completed ? `${successRate}<small>%</small>` : "—";
   $("#metric-delivered").textContent = `${delivered} delivered`;
   $("#metric-failed").textContent = failed;
   $("#failed-caption").textContent = failed === 1 ? "Failed delivery" : "Failed deliveries";
@@ -295,7 +295,7 @@ elements.deliveryRows.addEventListener("click", async (event) => {
   button.disabled = true;
   button.textContent = "Queueing…";
   try {
-    await request(`/deliveries/${encodeURIComponent(deliveryId)}/reply`, { method: "POST" });
+    await request(`/deliveries/${encodeURIComponent(deliveryId)}/retry`, { method: "POST" });
     showToast(`Delivery #${deliveryId} queued for retry.`);
     await refreshDashboard();
   } catch (error) {

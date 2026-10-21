@@ -137,6 +137,7 @@ tbody tr:last-child td { border-bottom: 0; }
 .endpoint-form .form-result { margin: 7px 0 0; }
 .status-pill { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #344532; border-radius: 20px; background: #1a251b; padding: 4px 7px; color: var(--green); font: 8px var(--mono); letter-spacing: .3px; white-space: nowrap; }
 .status-pill::before { width: 5px; height: 5px; border-radius: 50%; background: currentColor; content: ""; }
+.status-pill.status-inactive { border-color: #3a403b; background: #1b1e1b; color: #9aa39c; }
 .status-pill.status-failed { border-color: #4a3030; background: #251818; color: var(--red); }
 .status-pill.status-retrying, .status-pill.status-pending, .status-pill.status-processing { border-color: #4b402c; background: #211e16; color: var(--amber); }
 .empty-cell, .loading-cell { height: 94px; color: #78847b; text-align: center; }

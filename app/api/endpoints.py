@@ -22,6 +22,7 @@ class EndpointResponse(BaseModel):
 
     id: int
     url: str
+    is_active: bool
 
 
 class EndpointRegistrationResponse(EndpointResponse):

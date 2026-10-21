@@ -55,7 +55,7 @@ class FakeSession:
             Endpoint: self.endpoints,
             Delivery: self.deliveries,
         }.get(entity, [])
-        if entity is Endpoint:
+        if entity is Endpoint and statement.whereclause is not None:
             values = [endpoint for endpoint in values if endpoint.is_active]
         return FakeScalars(values)
 
@@ -113,6 +113,13 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"status": "ok"})
 
+    def test_dashboard_returns_html(self):
+        response = self.client.get("/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("text/html", response.headers["content-type"])
+        self.assertIn("Hook Forge", response.text)
+
     def test_register_endpoint_returns_secret_but_list_does_not(self):
         with patch("app.api.endpoints.validate_webhook_url"):
             response = self.client.post(
@@ -121,11 +128,13 @@ class ApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json()["url"], "https://hooks.example.com/")
+        self.assertTrue(response.json()["is_active"])
         self.assertTrue(response.json()["secret"].startswith("whsec_"))
 
         listed = self.client.get("/endpoints")
         self.assertEqual(listed.status_code, 200)
         self.assertEqual(len(listed.json()), 1)
+        self.assertTrue(listed.json()[0]["is_active"])
         self.assertNotIn("secret", listed.json()[0])
 
     def test_rejects_invalid_endpoint_url(self):
@@ -139,6 +148,21 @@ class ApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(self.db.endpoints, [])
+
+    def test_endpoint_list_returns_inactive_state(self):
+        self.db.endpoints.append(
+            Endpoint(
+                id=1,
+                url="https://inactive.example",
+                secret="secret",
+                is_active=False,
+            )
+        )
+
+        response = self.client.get("/endpoints")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json()[0]["is_active"])
 
     def test_event_creation_is_idempotent_and_fans_out(self):
         self.db.endpoints.extend(
@@ -209,7 +233,7 @@ class ApiTests(unittest.TestCase):
         )
         self.db.deliveries.append(delivery)
 
-        response = self.client.post("/deliveries/1/reply")
+        response = self.client.post("/deliveries/1/retry")
 
         self.assertEqual(response.status_code, 202)
         self.assertEqual(delivery.status, DeliveryStatus.RETRYING)
@@ -218,7 +242,7 @@ class ApiTests(unittest.TestCase):
         self.assertIsNone(delivery.error_message)
 
     def test_retry_rejects_missing_delivery(self):
-        response = self.client.post("/deliveries/404/reply")
+        response = self.client.post("/deliveries/404/retry")
 
         self.assertEqual(response.status_code, 404)
 
@@ -234,7 +258,7 @@ class ApiTests(unittest.TestCase):
             )
         )
 
-        response = self.client.post("/deliveries/1/reply")
+        response = self.client.post("/deliveries/1/retry")
 
         self.assertEqual(response.status_code, 400)
 

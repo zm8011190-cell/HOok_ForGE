@@ -31,7 +31,7 @@ async def list_deliveries(db: AsyncSession = Depends(get_db)):
     ]
 
 
-@router.post("/{delivery_id}/reply", status_code=status.HTTP_202_ACCEPTED)
+@router.post("/{delivery_id}/retry", status_code=status.HTTP_202_ACCEPTED)
 async def retry_delivery(delivery_id: int, db: AsyncSession = Depends(get_db)):
     delivery = await db.get(Delivery, delivery_id)
     if delivery is None:
